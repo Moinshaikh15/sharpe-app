@@ -92,7 +92,7 @@ export default function Transaction() {
             <span className=" text-red-700 ">{errorMsg}</span>
           )}
         </div>
-        <button type="submit" className="bg-black text-white p-2 rounded-lg">
+        <button type="submit" className="bg-[#6764a4]  text-white p-2 rounded-lg">
           Submit
         </button>
       </form>
