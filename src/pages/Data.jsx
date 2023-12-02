@@ -6,13 +6,16 @@ export default function Data() {
   const [chartData, setChartData] = useState([]);
 
   let fetchData = async () => {
+    // fetch the posts data from the api
     try {
       let response = await fetch(`https://jsonplaceholder.typicode.com/posts`);
-      let totalPosts = await response.json(); // Assuming the response is in JSON format
-      let user1Posts = totalPosts.filter((post) => post.userId === 1);
+      let totalPosts = await response.json();
 
+      // filter the posts to only get the posts by user ID 1
+      let user1Posts = totalPosts.filter((post) => post.userId === 1);
       setPosts(user1Posts);
 
+      // set the chartData for pie chart
       const chartData = [
         { name: "User ID 1's Posts", value: user1Posts.length },
         { name: "Total Posts", value: totalPosts.length },
@@ -24,7 +27,7 @@ export default function Data() {
   };
 
   useEffect(() => {
-    fetchData();
+    fetchData();//fetch posts data
   }, []);
 
   return (
@@ -33,7 +36,6 @@ export default function Data() {
         <span className="text-xl font-medium">Table: Posts by User ID 1</span>
 
         <table className="w-11/12 text-sm text-left rtl:text-right text-white">
-
           <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-[#2e2d4a] dark:text-gray-400">
             <tr>
               <th scope="col" className="px-6 py-3">
@@ -118,7 +120,6 @@ export default function Data() {
                   fill={index === 0 ? "#82ca9d" : "#8884d8"}
                 />
               ))}
-              <Tooltip label />
             </Pie>
           </PieChart>
         </ResponsiveContainer>

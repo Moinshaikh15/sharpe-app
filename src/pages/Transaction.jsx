@@ -1,13 +1,17 @@
+import { addDoc, collection } from "firebase/firestore";
 import { React, useState } from "react";
+import { db } from "../firebase-config";
 
 export default function Transaction() {
   let [errorMsg, setErrorMsg] = useState(null);
   let [showErrMsgFor, setShowErrMsgFor] = useState(null);
   let [showFormSuccessMsg, setShowFormSuccessMsg] = useState(false);
-  const handleSubmit = (event) => {
-    event.preventDefault();
-    setShowErrMsgFor(null);
 
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+    setShowErrMsgFor(null); // reset error message
+
+    //get the form values
     let walletAddress = event.target["wallet-address"].value;
     let amount = event.target.amount.value;
 
@@ -16,14 +20,12 @@ export default function Transaction() {
     if (!walletAddress) {
       setShowErrMsgFor("wallet-address");
       setErrorMsg("Wallet address field cannot be empty");
-
       return;
     } else if (!regex.test(walletAddress)) {
       setShowErrMsgFor("wallet-address");
       setErrorMsg(
         "Invalid wallet address. Please enter a correct wallet address."
       );
-
       return;
     }
 
@@ -31,42 +33,59 @@ export default function Transaction() {
     const min = 0;
     const max = 10000;
 
-    if(!amount){
+    if (!amount) {
       setShowErrMsgFor("amount");
       setErrorMsg(`Please enter a amount`);
       return;
-    }
-    else if (amount < min || amount > max) {
+    } else if (amount < min || amount > max) {
       setShowErrMsgFor("amount");
       setErrorMsg(`Amount must be between ${min} and ${max}`);
       return;
     }
 
-    event.target["wallet-address"].value = "";
-    event.target.amount.value = "";
-    setShowFormSuccessMsg(true);
-    setTimeout(() => {
-      setShowFormSuccessMsg(false);
-    }, 2000);
-    console.log("Form Submitted Successfully!");
+    // send data to firestore database
+    try {
+
+      //add data to transactions collection in firestore database
+      await addDoc(collection(db, "transactions"), {
+        walletAddress,
+        amount: parseFloat(amount),
+      });
+
+      //rest form values
+      event.target["wallet-address"].value = "";
+      event.target.amount.value = "";
+
+      setShowFormSuccessMsg(true);
+      setTimeout(() => {
+        setShowFormSuccessMsg(false);
+      }, 2000);
+
+    } catch (error) {
+      console.error("Error adding document: ", error);
+    }
   };
+
   return (
-    <div className="w-full h-screen pt-20 flex flex-col items-center justify-start gap-6 border border-red-600">
+    <div className="w-full h-screen pt-20 flex flex-col items-center justify-start gap-6 bg-[url('/bg.png')] bg-center bg-cover">
       {showFormSuccessMsg && (
         <span className=" bg-green-600 text-white p-2 rounded-lg absolute top-2 z-20 animate-[wiggle_1s_ease-in-out]">
           Form Submitted Successfully!
         </span>
       )}
 
-      <span className="text-2xl">Transaction</span>
+      <span className="text-3xl font-semibold">Transaction</span>
 
       <form
         action=""
         onSubmit={handleSubmit}
         className=" w-96 flex flex-col items-start justify-center gap-4"
       >
+        
         <div className=" w-full flex flex-col items-start justify-center gap-2">
-          <label htmlFor="wallet-address">Wallet Address</label>
+          <label htmlFor="wallet-address" className="text-lg">
+            Wallet Address
+          </label>
           <input
             type="text"
             id="wallet-address"
@@ -80,7 +99,9 @@ export default function Transaction() {
         </div>
 
         <div className="flex flex-col items-start justify-center gap-2">
-          <label htmlFor="amount">Amount</label>
+          <label htmlFor="amount" className="text-lg">
+            Amount
+          </label>
           <input
             type="number"
             id="amount"
@@ -92,7 +113,11 @@ export default function Transaction() {
             <span className=" text-red-700 ">{errorMsg}</span>
           )}
         </div>
-        <button type="submit" className="bg-[#6764a4]  text-white p-2 rounded-lg">
+
+        <button
+          type="submit"
+          className="bg-[#9E3FFD] text-lg  text-white p-2 rounded-lg"
+        >
           Submit
         </button>
       </form>

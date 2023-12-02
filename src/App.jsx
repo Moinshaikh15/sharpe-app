@@ -1,4 +1,3 @@
-import { useState } from "react";
 import Home from "./pages/Home";
 import Data from "./pages/Data";
 import Transaction from "./pages/Transaction";
